@@ -1,0 +1,102 @@
+import random
+
+# random dice rolls, 2 different dice, while combining both dice numbers for a total
+def roll_dice():
+    die1 = random.randint(1, 6)
+    die2 = random.randint(1, 6)
+    dice_combined_total = die1 + die2
+    return die1, die2, dice_combined_total
+
+
+#pass line wager, with logic for both come out roll result and point established result
+def pass_line(bet):
+    die1, die2, dice_combined_total = roll_dice()
+    if dice_combined_total in (7, 11):
+        return bet
+    if dice_combined_total in (2, 3, 12):
+        return -bet
+    established_point = dice_combined_total
+    while True:
+        die1, die2, dice_combined_total = roll_dice()
+        if dice_combined_total == established_point:
+            return bet
+        if dice_combined_total == 7:
+            return -bet
+
+
+#don't pass wager, with logic built in for both come out roll and after point is established
+def dont_pass(bet):
+    die1, die2, dice_combined_total = roll_dice()
+    if dice_combined_total in (2, 3):
+        return bet
+    if dice_combined_total in (7, 11):
+        return -bet
+    if dice_combined_total == 12:
+        return 0  # push
+    established_point = dice_combined_total
+    while True:
+        die1, die2, dice_combined_total = roll_dice()
+        if dice_combined_total == 7:
+            return bet
+        if dice_combined_total == established_point:
+            return -bet
+
+
+#field bet, wins besides when 5,6,7,8 roll and is a one roll bet
+def field(bet):
+    die1, die2, dice_combined_total = roll_dice()
+    if dice_combined_total in (3, 4, 9, 10, 11):
+        return bet
+    if dice_combined_total == 2:
+        return bet * 2
+    if dice_combined_total == 12:
+        return bet * 2
+    return -bet
+
+
+#any craps bet, 2,3,12 wins, every other dice combined total loses and is a one roll bet
+def any_craps(bet):
+    die1, die2, dice_combined_total = roll_dice()
+    if dice_combined_total in (2, 3, 12):
+        return bet * 7
+    else:
+        return -bet
+
+
+#any seven bet, wins only on a 7 roll, all other dice combined totals lose, and is a one roll bet
+def any_seven(bet):
+    die1, die2, dice_combined_total = roll_dice()
+    if dice_combined_total == 7:
+        return bet * 4
+    return -bet
+
+
+#running through the bets for 50,000 rounds to tracks the win percentage, loss percentage, push percentage, net win/loss, average net result per bet places
+def test_bet(bet_function, bet=25, rounds=50000):
+    wins = 0
+    losses = 0
+    pushes = 0
+    total_net = 0
+    for _ in range(rounds):
+        result = bet_function(bet)
+        total_net += result
+        if result > 0:
+            wins += 1
+        elif result < 0:
+            losses += 1
+        else:
+            pushes += 1
+    print(f"{bet_function.__name__} -> "
+          f"Wins: {wins / rounds * 100:.2f}% | "
+          f"Losses: {losses / rounds * 100:.2f}% | "
+          f"Pushes: {pushes / rounds * 100:.2f}% | "
+          f"Total Net: {total_net} | "
+          f"Average/round: {total_net / rounds:.3f}")
+
+
+#outputs for the bet function
+test_bet(pass_line)
+test_bet(dont_pass)
+test_bet(field)
+test_bet(any_seven)
+test_bet(any_craps)
